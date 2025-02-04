@@ -30,12 +30,10 @@ export default async function handler(
       `,
     });
 
-    res
-      .status(201)
-      .json({
-        message: "Demo request submitted successfully",
-        id: demoRequest.id,
-      });
+    res.status(201).json({
+      message: "Demo request submitted successfully",
+      id: demoRequest.id,
+    });
   } catch (error) {
     console.error("Error submitting demo request:", error);
     res.status(500).json({ message: "Error submitting demo request" });
