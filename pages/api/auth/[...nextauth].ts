@@ -40,6 +40,7 @@ export default NextAuth({
           email: user.email,
           name: `${user.firstName} ${user.lastName}`,
           role: user.role,
+          companyId: user.companyId,
         };
       },
     }),
@@ -48,18 +49,20 @@ export default NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role;
+        token.companyId = user.companyId;
       }
       return token;
     },
     async session({ session, token }) {
       if (session?.user) {
         session.user.role = token.role;
+        session.user.companyId = token.companyId;
       }
       return session;
     },
   },
   pages: {
-    signIn: "/auth/signin",
+    signIn: "/login",
   },
   session: {
     strategy: "jwt",
