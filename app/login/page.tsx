@@ -1,58 +1,120 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Card,
+  CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import Link from "next/link";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Store the token in localStorage or a secure cookie
+        localStorage.setItem("token", data.token);
+        // Redirect based on user role
+        switch (data.user.role) {
+          case "SUPER_ADMIN":
+            router.push("/super-admin-dashboard");
+            break;
+          case "COMPANY_ADMIN":
+            router.push("/company-admin-dashboard");
+            break;
+          case "MANAGER":
+            router.push("/manager-dashboard");
+            break;
+          case "EMPLOYEE":
+            router.push("/employee-dashboard");
+            break;
+          default:
+            router.push("/dashboard");
+        }
+      } else {
+        setError(data.message || "An error occurred during login");
+      }
+    } catch (err) {
+      setError("An error occurred during login");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="container flex items-center justify-center min-h-screen py-12">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            Login to StrategyPro
-          </CardTitle>
-          <CardDescription className="text-center">
-            Enter your email and password to access your account
+        <CardHeader>
+          <CardTitle>Login to StrategyPro</CardTitle>
+          <CardDescription>
+            Enter your credentials to access your account
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <label
-              htmlFor="email"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Email
-            </label>
-            <Input id="email" type="email" placeholder="m@example.com" />
-          </div>
-          <div className="space-y-2">
-            <label
-              htmlFor="password"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Password
-            </label>
-            <Input id="password" type="password" />
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
-          <Button className="w-full bg-[#175ea8] hover:bg-[#1e4b8d]">
-            Login
-          </Button>
-          <div className="text-sm text-center text-gray-500">
-            Don't have an account?{" "}
-            <Link href="/signup" className="text-[#175ea8] hover:underline">
-              Sign up
-            </Link>
-          </div>
-        </CardFooter>
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <label
+                htmlFor="email"
+                className="text-sm font-medium text-gray-700"
+              >
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label
+                htmlFor="password"
+                className="text-sm font-medium text-gray-700"
+              >
+                Password
+              </label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+          </CardContent>
+          <CardFooter>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Logging in..." : "Log in"}
+            </Button>
+          </CardFooter>
+        </form>
       </Card>
     </div>
   );
