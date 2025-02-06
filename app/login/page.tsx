@@ -35,12 +35,14 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
-        // Store the token in localStorage or a secure cookie
+        // Store the token and user role in localStorage
         localStorage.setItem("token", data.token);
+        localStorage.setItem("userRole", data.user.role);
+
         // Redirect based on user role
         switch (data.user.role) {
           case "SUPER_ADMIN":
-            router.push("/super-admin-dashboard");
+            router.push("/super-admin");
             break;
           case "COMPANY_ADMIN":
             router.push("/company-admin-dashboard");
