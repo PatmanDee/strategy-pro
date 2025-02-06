@@ -32,16 +32,6 @@ export default async function handler(
             expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
           },
         },
-        freeTrial: {
-          create: {
-            endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-          },
-        },
-      },
-      include: {
-        package: true,
-        license: true,
-        freeTrial: true,
       },
     });
 
